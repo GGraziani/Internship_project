@@ -1,15 +1,20 @@
-<html>
+<!DOCTYPE html>
+<html lang="en-US">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="initial-scale=1.0">
         <title>Login</title>
+
+        <link rel="stylesheet" href="css/style.css">
     </head>
 
     <body>
-        <form action="/login" method="post" class="">
-            <input class="form-control form-stacked" name="username" placeholder="Username" type="text">
-            <input class="form-control form-stacked last" name="password" placeholder="Password" type="password">
-            <input class="btn btn-beats btn-block btn-stacked" value="Log in" type="submit">
-        </form>
+        <div id="login">
+            <form action="/login" method="post">
+                <span class="fontawesome-user"></span><input type="text" name="username" required value="Username" placeholder="Username" onFocus="if(this.value=='Username')this.value='' ">
+                <span class="fontawesome-lock"></span><input type="password" name="password" required value="Password" placeholder="Password" onFocus="if(this.value=='Password')this.value='' ">
+                <input value="Log in" type="submit">
+            </form>
+        </div>
     </body>
 </html>
