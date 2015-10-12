@@ -1,0 +1,9 @@
+#!/usr/bin/env node
+var debug = require('debug')('moresi_server');
+var app = require('../app');
+
+app.set('port', process.env.PORT || 3000);
+app.set('host', process.env.HOST || "0.0.0.0");
+var server = app.listen(app.get('port'),app.get("host"), function() {
+  debug('Express server listening on port '+ app.get("host") + server.address().port);
+});

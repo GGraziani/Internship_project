@@ -1,0 +1,15 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="initial-scale=1.0">
+        <title>Login</title>
+    </head>
+
+    <body>
+        <form action="/login" method="post" class="">
+            <input class="form-control form-stacked" name="username" placeholder="Username" type="text">
+            <input class="form-control form-stacked last" name="password" placeholder="Password" type="password">
+            <input class="btn btn-beats btn-block btn-stacked" value="Log in" type="submit">
+        </form>
+    </body>
+</html>
