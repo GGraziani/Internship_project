@@ -24,7 +24,12 @@ router.post('/', function(req,res){
     passport.authenticate('local-login',
         { failureRedirect: '/login' }, function(err, user) {
             req.logIn(user, function(err) {
-                res.redirect('/home')
+                if(req.session.passport.user < 100){
+                    res.redirect('/admin')
+                }
+                else{
+                    res.redirect('/home')
+                }
             });
         })(req, res);
 

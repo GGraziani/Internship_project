@@ -10,7 +10,6 @@
 /* ---------- ERIC MEYER'S RESET CSS ---------- */
 /* ---------- http://meyerweb.com/eric/tools/css/reset/ ---------- */
 
-@import url(http://meyerweb.com/eric/tools/css/reset/reset.css);
 
 /* ---------- FONTAWESOME ---------- */
 
@@ -22,7 +21,7 @@
 
 body {
 	background: #393937;
-  font: 87.5%/1.5em sans-serif;
+  	font: 87.5%/1.5em sans-serif;
 }
 
 input {

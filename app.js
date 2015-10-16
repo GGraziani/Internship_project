@@ -35,8 +35,11 @@ app.use(passport.session());
 
 var routers = require('./routes/routers');
 app.use('/', routers.user);
-app.use('/home', routers.user)
+app.use('/home', routers.user);
 app.use('/login', routers.login);
 app.use("/logout",routers.logout);
+
+app.use('/admin', routers.admin);
+
 
 module.exports = app;

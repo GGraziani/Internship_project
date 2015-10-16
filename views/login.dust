@@ -11,8 +11,8 @@
     <body>
         <div id="login">
             <form action="/login" method="post">
-                <span class="fontawesome-user"></span><input type="text" name="username" required value="Username" placeholder="Username" onFocus="if(this.value=='Username')this.value='' ">
-                <span class="fontawesome-lock"></span><input type="password" name="password" required value="Password" placeholder="Password" onFocus="if(this.value=='Password')this.value='' ">
+                <span class="fontawesome-user"></span><input type="text" name="username" required value="Username" placeholder="Username" onBlur="if(this.value=='')this.value='Username'" onFocus="if(this.value=='Username')this.value='' ">
+                <span class="fontawesome-lock"></span><input type="password" name="password" required value="Password" placeholder="Password" onBlur="if(this.value=='')this.value='Password'" onFocus="if(this.value=='Password')this.value='' ">
                 <input value="Log in" type="submit">
             </form>
         </div>

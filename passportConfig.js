@@ -1,6 +1,8 @@
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
-var mysql      = require('mysql');
+var mysql = require('mysql');
+var bcrypt = require("bcrypt");
+
 
 //configure passport
 passport.use('local-login', new LocalStrategy(
@@ -24,20 +26,13 @@ passport.use('local-login', new LocalStrategy(
 ));
 
 var isValidPassword = function(password, password1,confirmationFunction){
-    if(password === password1) {
-        console.log('VALID');
-        confirmationFunction(null,true);
-    } else{
-        console.log('INVALID');
-        confirmationFunction(null,false);
-    }
 
-    //bcrypt.compare(password, this.password, function(err, isMatch) {
-    //    if (err) {
-    //        return confirmationFunction(err)
-    //    };
-    //    confirmationFunction(null, isMatch);
-    //});
+    bcrypt.compare(password, password1, function(err, isMatch) {
+        if (err) {
+            return confirmationFunction(err)
+        };
+        confirmationFunction(null, isMatch);
+    });
 };
 
 

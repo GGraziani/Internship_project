@@ -13,7 +13,6 @@ module.exports.supportedMethods = function(commaSeperatedMethods){
 module.exports.authorize = function(req, res, next) {
     console.log('MIDDLEWARE')
     console.log(req.session)
-    //if (!req.session.user_id) {
     if (!req.session.passport.user) {
         res.redirect('/login');
     } else {

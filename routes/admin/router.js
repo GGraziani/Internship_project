@@ -10,12 +10,9 @@ var middleware =  require('../middleware');
 //supported methods
 router.all('/', middleware.supportedMethods('GET, OPTIONS'));
 
-// get user page
+// get admin page
 router.get('/', middleware.authorize,function(req, res, next) {
-    res.redirect('/home');
-});
-router.get('/home', middleware.authorize,function(req, res, next) {
-    res.render('userPage');
+    res.render('adminPage');
 });
 
 
