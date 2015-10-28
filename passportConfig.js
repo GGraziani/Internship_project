@@ -8,7 +8,7 @@ var user_strategy = new LocalStrategy(
         console.log("username: "+username);
         console.log("password: "+password);
 
-        getUserByUsername(username,"userTable", function(err, rows, fields) {
+        getUserByUsername(username,"users", function(err, rows, fields) {
             if (err) return done(err);
             else if(!rows[0]) return done(null, false, { message: 'Access denied: Invalid username or password' });
             var user = rows[0];
@@ -27,7 +27,7 @@ var admin_strategy = new LocalStrategy(
         console.log("username: "+username);
         console.log("password: "+password);
 
-        getUserByUsername(username,"adminTable", function(err, rows, fields) {
+        getUserByUsername(username,"admins", function(err, rows, fields) {
             if (err) return done(err);
             else if(!rows[0]) return done(null, false, { message: 'Access denied: Invalid username or password' });
             var user = rows[0];
@@ -60,14 +60,14 @@ passport.serializeUser(function (user , done) {
     console.log("serialize");
     console.log(user);
 
-    done(null, user.UUID);
+    done(null, user.uid);
 });
 
 passport.deserializeUser(function (id, done) {
 
-    getUserByID(id, "userTable", function (err, user) {
+    getUserByID(id, "users", function (err, user) {
         if(!user[0]){
-            getUserByID(id, "adminTable", function (err, user) {
+            getUserByID(id, "admins", function (err, user) {
                 console.log("deserialize")
                 console.log(user);
                 done(err, user[0]);
@@ -83,9 +83,9 @@ passport.deserializeUser(function (id, done) {
 var getUserByUsername = function(username, table, callback){
     var connection = mysql.createConnection({
         host     : 'localhost',
-        user     : 'root',
-        password : '123',
-        database : 'testdb'
+        user     : 'moresi',
+        password : 'moresi',
+        database : 'test_moresi'
     });
 
     connection.connect(function(err){
@@ -104,9 +104,9 @@ var getUserByUsername = function(username, table, callback){
 var getUserByID = function(ID, table, callback){
     var connection = mysql.createConnection({
         host     : 'localhost',
-        user     : 'root',
-        password : '123',
-        database : 'testdb'
+        user     : 'moresi',
+        password : 'moresi',
+        database : 'test_moresi'
     });
 
     connection.connect(function(err){
@@ -117,6 +117,6 @@ var getUserByID = function(ID, table, callback){
         }
     });
 
-    connection.query('SELECT * FROM '+table+' WHERE UUID = ?', ID, callback);
+    connection.query('SELECT * FROM '+table+' WHERE uid = ?', ID, callback);
     connection.end();
 };
