@@ -16,22 +16,33 @@ router.get('/', function(req, res, next) {
   res.render('login');
 });
 
-//router.post('/', passport.authenticate('local-login', { successRedirect: '/', failureRedirect: '/login' }));
+//router.post('/', passport.authenticate('local-login', { successRedirect: '/home', failureRedirect: '/login' }));
 
-router.post('/', function(req,res){
-    console.log(req.form)
-
+router.post('/', function(req,res,next){
     passport.authenticate('local-login',
-        { failureRedirect: '/login' }, function(err, user) {
-            req.logIn(user, function(err) {
-                if(req.session.passport.user < 100){
-                    res.redirect('/admin')
-                }
-                else{
-                    res.redirect('/home')
-                }
+        function(err, user, info) {
+            if(err) {
+                return next(err);
+            }
+            if (!user){
+                return res.render('login', { message: info.message })
+            }
+
+            req.session.userdata = {
+                UUID : user.UUID,
+                username: user.username,
+                email : user.email,
+                company : user.company
+            };
+
+
+
+            req.logIn(user, function(user,err) {
+
+                if(err) return next(err);
+                res.redirect('/home')
             });
-        })(req, res);
+        })(req, res, next);
 
     }
 );

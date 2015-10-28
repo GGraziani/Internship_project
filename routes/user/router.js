@@ -15,7 +15,14 @@ router.get('/', middleware.authorize,function(req, res, next) {
     res.redirect('/home');
 });
 router.get('/home', middleware.authorize,function(req, res, next) {
-    res.render('userPage');
+
+    var userdata = req.session.userdata;
+    console.log("userdata user mode")
+    console.log(req.session.userdata)
+    console.log("--------------userdata--------------")
+    res.render('home', userdata);
+
+    //res.render('home');
 });
 
 
