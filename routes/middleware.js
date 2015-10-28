@@ -11,8 +11,16 @@ module.exports.supportedMethods = function(commaSeperatedMethods){
 };
 
 module.exports.authorize = function(req, res, next) {
-    console.log('MIDDLEWARE')
-    console.log(req.session)
+    console.log("authorize user")
+    if (!req.session.passport.user) {
+        res.redirect('/login');
+    } else {
+        next();
+    }
+};
+
+module.exports.authorizeAdmin = function(req, res, next) {
+    console.log("authorize admin")
     if (!req.session.passport.user) {
         res.redirect('/login');
     } else {

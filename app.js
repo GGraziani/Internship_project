@@ -34,12 +34,40 @@ app.use(passport.session());
 
 
 var routers = require('./routes/routers');
-app.use('/', routers.user);
-app.use('/home', routers.user);
+
+
+// login pages
+app.use('/admin/login', routers.adminLogin);
 app.use('/login', routers.login);
+
+// logout
 app.use("/logout",routers.logout);
 
+// users routes
+app.use('/', routers.user);
+app.use('/home', routers.user);
+
+// admin routes
 app.use('/admin', routers.admin);
 
+
+
+//var index = require("./routes/user/router.js");
+//var home = require("./routes/user/router.js");
+//
+//var login = require("./routes/login/router.js");
+//var logout = require("./routes/logout/router.js");
+//
+//var adminLogin = require("./routes/adminLogin/router.js");
+//var admin = require("./routes/admin/router.js");
+//
+//app.use('/', index);
+//app.use('/home', home);
+//app.use('/login', login);
+//app.use("/logout",logout);
+//
+//
+//app.use('/admin/login', adminLogin);
+//app.use('/admin', admin);
 
 module.exports = app;

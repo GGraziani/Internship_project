@@ -11,9 +11,15 @@ var middleware =  require('../middleware');
 router.all('/', middleware.supportedMethods('GET, OPTIONS'));
 
 // get admin page
-router.get('/', middleware.authorize,function(req, res, next) {
-    res.render('adminPage');
+router.get('/', middleware.authorizeAdmin,function(req, res, next) {
+    //console.log(req.session.passport);
+    var userdata = req.session.userdata;
+    console.log("userdata admin mode")
+    console.log(req.session.userdata)
+    console.log("--------------userdata--------------")
+    res.render('home', userdata);
 });
+
 
 
 // get one user page
