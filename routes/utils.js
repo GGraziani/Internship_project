@@ -4,9 +4,9 @@ var mysql = require('mysql');
 
 var pool = mysql.createPool( {
     host     : 'localhost',
-    user     : 'root',
-    password : '123',
-    database : 'testdb'
+    user     : 'moresi',
+    password : 'moresi',
+    database : 'test_moresi'
 });
 
 // connected to DB as user moresi.
