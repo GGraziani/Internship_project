@@ -4,7 +4,7 @@
 var express = require('express');
 var router = express.Router();
 var middleware =  require('../middleware');
-var utils =  require('../utils');
+var utils =  require('../../utils');
 
 //var rootUrl = require("../../config").url;
 
@@ -22,10 +22,9 @@ router.get('/home', middleware.authorize,function(req, res, next) {
 
 
 
-    console.log("userdata user mode")
-    console.log(req.session.userdata)
-    console.log("--------------userdata--------------")
-
+    console.log("userdata user mode");
+    console.log(req.session.userdata);
+    console.log("--------------userdata--------------");
     var current_date = new Date();
     var current_year = 1900 + current_date.getYear();
     var current_month = 0 + '' + 9;

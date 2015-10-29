@@ -1,7 +1,7 @@
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
-var mysql = require('mysql');
 var bcrypt = require("bcrypt");
+var utils =  require('./utils');
 
 var user_strategy = new LocalStrategy(
     function (username, password, done) {
@@ -66,14 +66,15 @@ passport.serializeUser(function (user , done) {
 passport.deserializeUser(function (id, done) {
 
     getUserByID(id, "users", function (err, user) {
+        console.log(user[0]);
         if(!user[0]){
             getUserByID(id, "admins", function (err, user) {
-                console.log("deserialize")
+                console.log("deserialize");
                 console.log(user);
                 done(err, user[0]);
             });
         } else{
-            console.log("deserialize")
+            console.log("deserialize");
             console.log(user);
             done(err, user[0]);
         }
@@ -81,42 +82,56 @@ passport.deserializeUser(function (id, done) {
 });
 
 var getUserByUsername = function(username, table, callback){
-    var connection = mysql.createConnection({
-        host     : 'localhost',
-        user     : 'moresi',
-        password : 'moresi',
-        database : 'test_moresi'
-    });
 
-    connection.connect(function(err){
-        if(err){
-            console.log("connection error: "+err)
-        } else{
-            console.log("connection established!");
-        }
-    });
 
-    connection.query('SELECT * FROM '+table+' WHERE username = ?', username, callback);
+    // Commented old way for restoring, now does query with pool with connection from utils,js
 
-    connection.end();
+    utils.request('SELECT * FROM ' + table + ' WHERE username = ?', [username], callback);
+
+
+    //var connection = mysql.createConnection({
+    //    host     : 'localhost',
+    //    user     : 'moresi',
+    //    password : 'moresi',
+    //    database : 'test_moresi'
+    //});
+    //
+    //connection.connect(function(err){
+    //    if(err){
+    //        console.log("connection error: "+err)
+    //    } else{
+    //        console.log("connection established!");
+    //    }
+    //});
+
+    //connection.query('SELECT * FROM '+table+' WHERE username = ?', username, callback);
+    //
+    //connection.end();
 };
 
 var getUserByID = function(ID, table, callback){
-    var connection = mysql.createConnection({
-        host     : 'localhost',
-        user     : 'moresi',
-        password : 'moresi',
-        database : 'test_moresi'
-    });
 
-    connection.connect(function(err){
-        if(err){
-            console.log("connection error: "+err)
-        } else{
-            console.log("connection established!");
-        }
-    });
 
-    connection.query('SELECT * FROM '+table+' WHERE uid = ?', ID, callback);
-    connection.end();
+    // Commented old way for restoring, now does query with pool with connection from utils,js
+
+    utils.request('SELECT * FROM ' + table + ' WHERE uid = ?', [ID], callback);
+
+
+    //var connection = mysql.createConnection({
+    //    host     : 'localhost',
+    //    user     : 'moresi',
+    //    password : 'moresi',
+    //    database : 'test_moresi'
+    //});
+    //
+    //connection.connect(function(err){
+    //    if(err){
+    //        console.log("connection error: "+err)
+    //    } else{
+    //        console.log("connection established!");
+    //    }
+    //});
+
+    //connection.query('SELECT * FROM '+table+' WHERE uid = ?', ID, callback);
+    //connection.end();
 };
