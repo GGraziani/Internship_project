@@ -3,10 +3,13 @@ var mysql = require('mysql');
 // establishing connection with database.
 
 var pool = mysql.createPool( {
-    host     : 'localhost',
-    user     : 'moresi',
-    password : 'moresi',
-    database : 'test_moresi'
+
+    connectionLimit : 100,
+    host            : 'localhost',
+    user            : 'moresi',
+    password        : 'moresi',
+    database        : 'test_moresi'
+
 });
 
 // connected to DB as user moresi.
@@ -22,9 +25,11 @@ module.exports.request = function(query, params, callback) {
 
             console.log('Connected as id ' + connection.threadId);
 
-            connection.query(query, params, callback);
-            connection.release();
+            console.log(query, params);
 
+            connection.query( query, params, function(err, rows) {
+                callback(err, rows, connection);
+            });
         }
     });
-}
+};
