@@ -34,9 +34,6 @@ router.post('/', function(req,res,next){
                 email : user.email,
                 company : user.company
             };
-
-
-
             req.logIn(user, function(user,err) {
 
                 if(err) return next(err);

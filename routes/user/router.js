@@ -18,37 +18,48 @@ router.get('/', middleware.authorize,function(req, res, next) {
 });
 router.get('/home', middleware.authorize,function(req, res, next) {
 
-
-    console.log("userdata user mode");
-    console.log(req.session.userdata);
-    console.log("--------------userdata--------------");
-    var current_date = new Date();
-    var current_year = 1900 + current_date.getYear();
-    var current_month = 0 + '' + 9;
-
-    var db_date = current_year + '' + current_month + '' + 0 + '' + 0;
-
-    utils.request('SELECT out1 FROM rilevazioni WHERE date > ? and hostname = ?', [db_date, req.session.userdata.company],
-        function(err, rows, connection){
-
+    utils.request('SELECT ip FROM pdu WHERE uid = ?', [req.session.userdata.uid],
+        function(err, rows1, connection){
             if(err) {
                 console.error('Error selecting: ' + err.stack);
             } else {
-                connection.release();
-                console.log("Successf connection.release();ul query");
+                console.log(rows1);
 
-
-                var average = 0;
-                for(var i = 0; i < rows.length; i++) {
-                    average += rows[i].out1;
+                var params = [utils.getDate()];
+                params.push(rows1[0].ip);
+                var ips = "ip = ?";
+                for(var i = 1; i < rows1.length; i++){
+                    ips += " or ip = ?"
+                    params.push(rows1[i].ip)
                 }
-            average = (average/rows.length).toFixed(2);
-            req.session.userdata.average = average;
-        }
-        res.render('home', req.session.userdata);
-    });
+                console.log(ips);
+                console.log(params);
 
+
+                utils.request('SELECT out1 FROM rilevazioni WHERE date > ? and ('+ips+')', params,
+                    function(err, rows, connection){
+
+                        connection.release();
+                        console.log("Successf connection.release()");
+
+                        if(err) {
+                            console.error('Error selecting: ' + err.stack);
+                        } else {
+                            var params1 = req.session.userdata;
+                            params1.average = utils.getAverageOut1(rows);
+
+                            console.log("--------------userdata--------------");
+                            console.log(params1);
+                            console.log("--------------userdata--------------");
+                        }
+                        res.render('home', params1);
+                    });
+            }
+        }
+    )
 });
+
+
 
 
 

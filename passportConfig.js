@@ -122,23 +122,4 @@ var getUserByID = function(ID, table, callback){
         connection.release();
         callback(err, rows)
     });
-
-
-    //var connection = mysql.createConnection({
-    //    host     : 'localhost',
-    //    user     : 'moresi',
-    //    password : 'moresi',
-    //    database : 'test_moresi'
-    //});
-    //
-    //connection.connect(function(err){
-    //    if(err){
-    //        console.log("connection error: "+err)
-    //    } else{
-    //        console.log("connection established!");
-    //    }
-    //});
-
-    //connection.query('SELECT * FROM '+table+' WHERE uid = ?', ID, callback);
-    //connection.end();
 };
