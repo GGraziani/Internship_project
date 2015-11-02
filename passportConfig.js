@@ -4,11 +4,12 @@ var bcrypt = require("bcrypt");
 var utils =  require('./utils');
 
 var user_strategy = new LocalStrategy(
+
     function (username, password, done) {
         console.log("username: "+username);
         console.log("password: "+password);
 
-        getUserByUsername(username,"users", function(err, rows, fields) {
+        getUserByUsername( username, 'users', function ( err, rows ) {
             if (err) return done(err);
             else if(!rows[0]) return done(null, false, { message: 'Access denied: Invalid username or password' });
             var user = rows[0];
@@ -27,7 +28,7 @@ var admin_strategy = new LocalStrategy(
         console.log("username: "+username);
         console.log("password: "+password);
 
-        getUserByUsername(username,"admins", function(err, rows, fields) {
+        getUserByUsername( username, "admins", function( err, rows ) {
             if (err) return done(err);
             else if(!rows[0]) return done(null, false, { message: 'Access denied: Invalid username or password' });
             var user = rows[0];
@@ -50,7 +51,7 @@ var isValidPassword = function(password, password1,confirmationFunction){
     bcrypt.compare(password, password1, function(err, isMatch) {
         if (err) {
             return confirmationFunction(err)
-        };
+        }
         confirmationFunction(null, isMatch);
     });
 };
@@ -86,7 +87,10 @@ var getUserByUsername = function(username, table, callback){
 
     // Commented old way for restoring, now does query with pool with connection from utils,js
 
-    utils.request('SELECT * FROM ' + table + ' WHERE username = ?', [username], callback);
+    utils.request( 'SELECT * FROM ' + table + ' WHERE username = ?', [username], function(err, rows, connection) {
+        connection.release();
+        callback(err, rows)
+    });
 
 
     //var connection = mysql.createConnection({
@@ -114,7 +118,10 @@ var getUserByID = function(ID, table, callback){
 
     // Commented old way for restoring, now does query with pool with connection from utils,js
 
-    utils.request('SELECT * FROM ' + table + ' WHERE uid = ?', [ID], callback);
+    utils.request( 'SELECT * FROM ' + table + ' WHERE uid = ?', [ID], function(err, rows, connection) {
+        connection.release();
+        callback(err, rows)
+    });
 
 
     //var connection = mysql.createConnection({

@@ -18,9 +18,6 @@ router.get('/', middleware.authorize,function(req, res, next) {
 });
 router.get('/home', middleware.authorize,function(req, res, next) {
 
-    var userdata = req.session.userdata;
-
-
 
     console.log("userdata user mode");
     console.log(req.session.userdata);
@@ -31,19 +28,24 @@ router.get('/home', middleware.authorize,function(req, res, next) {
 
     var db_date = current_year + '' + current_month + '' + 0 + '' + 0;
 
-    utils.request('SELECT out1 FROM rilevazioni WHERE date > ? and hostname = ?', [db_date, "Pdu_Swissvoip_B"], function(err, rows) {
-        if(err) {
-            console.error('Error selecting: ' + err.stack);
-        } else {
-            var average = 0;
-            console.log("Successful query");
-            for(var i = 0; i < rows.length; i++) {
-                average += rows[i].out1;
-            }
+    utils.request('SELECT out1 FROM rilevazioni WHERE date > ? and hostname = ?', [db_date, req.session.userdata.company],
+        function(err, rows, connection){
+
+            if(err) {
+                console.error('Error selecting: ' + err.stack);
+            } else {
+                connection.release();
+                console.log("Successf connection.release();ul query");
+
+
+                var average = 0;
+                for(var i = 0; i < rows.length; i++) {
+                    average += rows[i].out1;
+                }
             average = (average/rows.length).toFixed(2);
-            userdata.average = average;
+            req.session.userdata.average = average;
         }
-        res.render('home', userdata);
+        res.render('home', req.session.userdata);
     });
 
 });

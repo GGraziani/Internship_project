@@ -27,9 +27,9 @@ module.exports.request = function(query, params, callback) {
 
             console.log(query, params);
 
-            connection.query(query, params, callback);
-            connection.release();
-
+            connection.query( query, params, function(err, rows) {
+                callback(err, rows, connection);
+            });
         }
     });
 };
