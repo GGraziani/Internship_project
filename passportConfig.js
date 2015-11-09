@@ -1,6 +1,6 @@
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
-var bcrypt = require("bcrypt");
+var bcrypt = require('bcrypt');
 var utils =  require('./utils');
 
 var user_strategy = new LocalStrategy(
