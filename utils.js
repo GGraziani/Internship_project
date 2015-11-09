@@ -36,6 +36,8 @@ module.exports.request = function(query, params, callback) {
     });
 };
 
+
+// Build the right DB query format
 module.exports.getDate = function(){
 
     var current_date = new Date();
