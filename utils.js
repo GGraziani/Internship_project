@@ -14,6 +14,8 @@ var pool = mysql.createPool( {
 
 // connected to DB as user moresi.
 
+
+// function for sending query through the pool
 module.exports.request = function(query, params, callback) {
     pool.getConnection(function (err, connection) {
 
@@ -58,16 +60,17 @@ module.exports.getAverage = function(rows, field, interval) {
     var counter = 0;
 
 
-    if(!interval) {
+    if(!interval) { // Do month average and return one value
 
         for( var i = 0; i < rows.length; i++ ) {
             average[0] += rows[i][field];
         }
 
+        // Return average with 2 sig
         return (average[0]/rows.length).toFixed(2);
 
 
-    } else {
+    } else { // Do average for every 'interval' values, return array
 
         for( var i = 0 ; i < rows.length; i++ ) {
             if( (i + 1)%interval == 0) {
@@ -79,12 +82,12 @@ module.exports.getAverage = function(rows, field, interval) {
 
         }
 
+        // pass the array and average all values
         for( var j = 0 ; j < average.length - 1; j++ ) {
             average[j] = (average[j]/interval).toFixed(2);
         }
         if( (i + 1)%interval != 0) {
             average[average.length - 1] = (average[average.length - 1] / (rows.length % interval)).toFixed(2);
-            console.log('--' ,average.length, rows.length, interval, (rows.length % interval));
         }
 
         return average;
