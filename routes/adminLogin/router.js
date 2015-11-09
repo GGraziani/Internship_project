@@ -33,7 +33,7 @@ router.post('/', function(req,res,next){
                         })
                 }
                 req.session.userdata = {
-                    UUID : user.UUID,
+                    uid : user.uid,
                     username: user.username,
                     email : user.email,
                     permissions : user.permissions
