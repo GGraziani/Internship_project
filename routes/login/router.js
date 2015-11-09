@@ -32,7 +32,9 @@ router.post('/', function(req,res,next){
                 uid : user.uid,
                 username: user.username,
                 email : user.email,
-                company : user.company
+                company : user.company,
+                averageMonth : 0,
+                average12h : []
             };
             req.logIn(user, function(user,err) {
 

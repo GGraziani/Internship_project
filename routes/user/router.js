@@ -19,41 +19,44 @@ router.get('/', middleware.authorize,function(req, res, next) {
 router.get('/home', middleware.authorize,function(req, res, next) {
 
     utils.request('SELECT ip FROM pdu WHERE uid = ?', [req.session.userdata.uid],
-        function(err, rows1, connection){
-            if(err) {
+        function(errQ1, rowsQ1, connectionQ1){
+
+            connectionQ1.release();
+            if(errQ1) {
                 console.error('Error selecting: ' + err.stack);
             } else {
-                console.log(rows1);
 
-                var params = [utils.getDate()];
-                params.push(rows1[0].ip);
+                var paramsQ1 = [utils.getDate()];
+                paramsQ1.push(rowsQ1[0].ip);
                 var ips = "ip = ?";
-                for(var i = 1; i < rows1.length; i++){
-                    ips += " or ip = ?"
-                    params.push(rows1[i].ip)
+                for( var i = 1; i < rowsQ1.length; i++ ){
+                    ips += " or ip = ?";
+                    paramsQ1.push(rowsQ1[i].ip)
                 }
+
                 console.log(ips);
-                console.log(params);
+                console.log(paramsQ1);
 
+                utils.request('SELECT out1 FROM rilevazioni WHERE date > ? and (' + ips + ')', paramsQ1,
+                    function(errQ2, rowsQ2, connectionQ2){
 
-                utils.request('SELECT out1 FROM rilevazioni WHERE date > ? and ('+ips+')', params,
-                    function(err, rows, connection){
+                        connectionQ2.release();
+                        console.log("Successful connection.release()");
 
-                        connection.release();
-                        console.log("Successf connection.release()");
-
-                        if(err) {
+                        if(errQ2) {
                             console.error('Error selecting: ' + err.stack);
                         } else {
-                            var params1 = req.session.userdata;
-                            params1.average = utils.getAverageOut1(rows);
+                            req.session.userdata.averageMonth = utils.getAverage(rowsQ2, 'out1');
+                            req.session.userdata.average12h = utils.getAverage(rowsQ2, 'out1', 72);
 
                             console.log("--------------userdata--------------");
-                            console.log(params1);
+                            console.log(req.session.userdata);
                             console.log("--------------userdata--------------");
                         }
-                        res.render('home', params1);
+                        res.render('home', req.session.userdata);
                     });
+
+
             }
         }
     )
