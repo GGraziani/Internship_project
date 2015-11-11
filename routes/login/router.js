@@ -21,6 +21,7 @@ router.get('/', function(req, res, next) {
 router.post('/', function(req,res,next){
     passport.authenticate('local-login',
         function(err, user, info) {
+            console.log(info)
             if(err) {
                 return next(err);
             }
@@ -33,8 +34,6 @@ router.post('/', function(req,res,next){
                 username: user.username,
                 email : user.email,
                 company : user.company,
-                averageMonth : 0,
-                average12h : []
             };
             req.logIn(user, function(user,err) {
 
