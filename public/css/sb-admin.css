@@ -19,10 +19,12 @@ body {
 
 #wrapper {
     padding-left: 0;
+    height: 100%;   /* EDITED */
 }
 
 #page-wrapper {
     width: 100%;
+    height: 100%;   /* EDITED */
     padding: 0;
     background-color: #fff;
 }
@@ -158,7 +160,7 @@ ul.alert-dropdown {
 
 .flot-chart {
     display: block;
-    height: 400px;
+    height: 300px;
 }
 
 .flot-chart-content {
@@ -225,3 +227,36 @@ ul.alert-dropdown {
 .panel-yellow > a:hover {
     color: #df8a13;
 }
+
+/*------------ Edited ------------*/
+
+.refresh_button:hover{
+    color: #555;
+}
+
+.refresh_button, .stat{
+    cursor: pointer;
+}
+.stat{
+    font-size: 20px;
+    background-color: #337ab7;
+}
+
+.stat:hover{
+    background-color: #005ab7;
+}
+
+.stat >.active{
+    color: white;
+}
+
+.unactive > .content {
+    max-height: 0;
+    overflow: hidden;
+}
+
+.list_indicator{
+    float:right;
+    color: white;
+}
+

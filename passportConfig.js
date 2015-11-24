@@ -16,7 +16,7 @@ var user_strategy = new LocalStrategy(
 
             isValidPassword(password, user.password, function(err,isMatch){
                 if (err) return done(err);
-                if (!isMatch) return done(null, false);
+                if (!isMatch) return done(null, false, { message: "Access denied: Invalid username or password" });
                 else return done(null, user);
             });
         })
@@ -35,7 +35,7 @@ var admin_strategy = new LocalStrategy(
 
             isValidPassword(password, user.password, function(err,isMatch){
                 if (err) return done(err);
-                if (!isMatch) return done(null, false);
+                if (!isMatch) return done(null, false, { message: "Access denied: Invalid username or password" });
                 else return done(null, user);
             });
         })

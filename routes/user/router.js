@@ -17,13 +17,18 @@ router.get('/', middleware.authorize,function(req, res, next) {
     res.redirect('/home');
 });
 router.get('/home', middleware.authorize,function(req, res, next) {
+    res.render('home', req.session.userdata);
+});
 
-    utils.request('SELECT ip FROM pdu WHERE uid = ?', [req.session.userdata.uid],
+router.get('/dashboard', middleware.authorize,function(req, res, next) {
+    utils.request('SELECT hostname, ip FROM pdu WHERE uid = ?', [req.session.userdata.uid],
         function(errQ1, rowsQ1, connectionQ1){
 
             connectionQ1.release();
             if(errQ1) {
-                console.error('Error selecting: ' + err.stack);
+                res.json({
+                    error : "Database request error!"
+                });
             } else {
 
                 var paramsQ1 = [utils.getDate()];
@@ -33,11 +38,12 @@ router.get('/home', middleware.authorize,function(req, res, next) {
                     ips += " or ip = ?";
                     paramsQ1.push(rowsQ1[i].ip)
                 }
-
+                console.log("ips");
                 console.log(ips);
+                console.log("params");
                 console.log(paramsQ1);
 
-                utils.request('SELECT out1 FROM rilevazioni WHERE date > ? and (' + ips + ')', paramsQ1,
+                utils.request('SELECT  date, time, out1 FROM rilevazioni WHERE date > ? and (' + ips + ')', paramsQ1,
                     function(errQ2, rowsQ2, connectionQ2){
 
                         connectionQ2.release();
@@ -46,34 +52,23 @@ router.get('/home', middleware.authorize,function(req, res, next) {
                         if(errQ2) {
                             console.error('Error selecting: ' + err.stack);
                         } else {
-                            req.session.userdata.averageMonth = utils.getAverage(rowsQ2, 'out1');
-                            req.session.userdata.average12h = utils.getAverage(rowsQ2, 'out1', 72);
 
-                            console.log("--------------userdata--------------");
-                            console.log(req.session.userdata);
-                            console.log("--------------userdata--------------");
+                            var plotData = utils.plotData(rowsQ2, 'out1', 24);
+                            var data = {
+
+                                average24h : plotData[0],
+                                total24h : plotData[1],
+                                instantCons : utils.getInstantConsumption(rowsQ2, true),
+                                pdu : rowsQ1
+
+                            };
+                            res.json(data);
                         }
-                        res.render('home', req.session.userdata);
                     });
-
-
             }
         }
     )
 });
 
-
-
-
-
-
-
-
-// get one user page
-//router.get('/:userid', function(req, res, next) {
-//
-//  console.log('ciaooooo')
-//  res.render('userPage');
-//});
 /** router for /users */
 module.exports = router;

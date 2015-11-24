@@ -1,4 +1,4 @@
-/*! Dust - Asynchronous Templating - v2.5.0
+/*! Dust - Asynchronous Templating - v2.3.3
 * http://linkedin.github.io/dustjs/
 * Copyright (c) 2014 Aleksander Williams; Released under the MIT License */
 (function(root) {
@@ -10,70 +10,63 @@
       DEBUG = 'DEBUG',
       loggingLevels = [DEBUG, INFO, WARN, ERROR, NONE],
       EMPTY_FUNC = function() {},
-      logger = {},
-      originalLog,
-      loggerContext;
+      logger = EMPTY_FUNC,
+      loggerContext = this;
 
   dust.debugLevel = NONE;
+  dust.silenceErrors = false;
 
-  dust.config = {
-    whitespace: false,
-  };
-
-  // Directive aliases to minify code
-  dust._aliases = {
-    "write": "w",
-    "end": "e",
-    "map": "m",
-    "render": "r",
-    "reference": "f",
-    "section": "s",
-    "exists": "x",
-    "notexists": "nx",
-    "block": "b",
-    "partial": "p",
-    "helper": "h"
-  };
-
-  // Try to find the console in global scope
+  // Try to find the console logger in global scope
   if (root && root.console && root.console.log) {
+    logger = root.console.log;
     loggerContext = root.console;
-    originalLog = root.console.log;
   }
 
-  // robust logger for node.js, modern browsers, and IE <= 9.
-  logger.log = loggerContext ? function() {
-      // Do this for normal browsers
-      if (typeof originalLog === 'function') {
-        logger.log = function() {
-          originalLog.apply(loggerContext, arguments);
-        };
-      } else {
-        // Do this for IE <= 9
-        logger.log = function() {
-          var message = Array.prototype.slice.apply(arguments).join(' ');
-          originalLog(message);
-        };
-      }
-      logger.log.apply(this, arguments);
-  } : function() { /* no op */ };
-
   /**
-   * Log dust debug statements, info statements, warning statements, and errors.
-   * Filters out the messages based on the dust.debuglevel.
+   * If dust.isDebug is true, Log dust debug statements, info statements, warning statements, and errors.
    * This default implementation will print to the console if it exists.
    * @param {String|Error} message the message to print/throw
    * @param {String} type the severity of the message(ERROR, WARN, INFO, or DEBUG)
    * @public
    */
   dust.log = function(message, type) {
+    if(dust.isDebug && dust.debugLevel === NONE) {
+      logger.call(loggerContext, '[!!!DEPRECATION WARNING!!!]: dust.isDebug is deprecated.  Set dust.debugLevel instead to the level of logging you want ["debug","info","warn","error","none"]');
+      dust.debugLevel = INFO;
+    }
+
     type = type || INFO;
-    if (dust.debugLevel !== NONE && dust.indexInArray(loggingLevels, type) >= dust.indexInArray(loggingLevels, dust.debugLevel)) {
+    if (loggingLevels.indexOf(type) >= loggingLevels.indexOf(dust.debugLevel)) {
       if(!dust.logQueue) {
         dust.logQueue = [];
       }
       dust.logQueue.push({message: message, type: type});
-      logger.log('[DUST ' + type + ']: ' + message);
+      logger.call(loggerContext, '[DUST ' + type + ']: ' + message);
+    }
+
+    if (!dust.silenceErrors && type === ERROR) {
+      if (typeof message === 'string') {
+        throw new Error(message);
+      } else {
+        throw message;
+      }
+    }
+  };
+
+  /**
+   * If debugging is turned on(dust.isDebug=true) log the error message and throw it.
+   * Otherwise try to keep rendering.  This is useful to fail hard in dev mode, but keep rendering in production.
+   * @param {Error} error the error message to throw
+   * @param {Object} chunk the chunk the error was thrown from
+   * @public
+   */
+  dust.onError = function(error, chunk) {
+    logger.call(loggerContext, '[!!!DEPRECATION WARNING!!!]: dust.onError will no longer return a chunk object.');
+    dust.log(error.message || error, ERROR);
+    if(!dust.silenceErrors) {
+      throw error;
+    } else {
+      return chunk;
     }
   };
 
@@ -93,18 +86,17 @@
     try {
       dust.load(name, chunk, Context.wrap(context, name)).end();
     } catch (err) {
-      chunk.setError(err);
+      dust.log(err, ERROR);
     }
   };
 
   dust.stream = function(name, context) {
-    var stream = new Stream(),
-        chunk = stream.head;
+    var stream = new Stream();
     dust.nextTick(function() {
       try {
         dust.load(name, stream.head, Context.wrap(context, name)).end();
       } catch (err) {
-        chunk.setError(err);
+        dust.log(err, ERROR);
       }
     });
     return stream;
@@ -167,40 +159,6 @@
     };
   }
 
-  // indexOf shim for arrays for IE <= 8
-  // source: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf
-  dust.indexInArray = function(arr, item, fromIndex) {
-    fromIndex = +fromIndex || 0;
-    if (Array.prototype.indexOf) {
-      return arr.indexOf(item, fromIndex);
-    } else {
-    if ( arr === undefined || arr === null ) {
-      throw new TypeError( 'cannot call method "indexOf" of null' );
-    }
-
-    var length = arr.length; // Hack to convert object.length to a UInt32
-
-    if (Math.abs(fromIndex) === Infinity) {
-      fromIndex = 0;
-    }
-
-    if (fromIndex < 0) {
-      fromIndex += length;
-      if (fromIndex < 0) {
-        fromIndex = 0;
-      }
-    }
-
-    for (;fromIndex < length; fromIndex++) {
-      if (arr[fromIndex] === item) {
-        return fromIndex;
-      }
-    }
-
-    return -1;
-    }
-  };
-
   dust.nextTick = (function() {
     return function(callback) {
       setTimeout(callback,0);
@@ -224,6 +182,7 @@
         var name = filters[i];
         if (name === 's') {
           auto = null;
+          dust.log('Using unescape filter on [' + string + ']', DEBUG);
         }
         else if (typeof dust.filters[name] === 'function') {
           string = dust.filters[name](string);
@@ -316,7 +275,8 @@
   Context.prototype._get = function(cur, down) {
     var ctx = this.stack,
         i = 1,
-        value, first, len, ctxThis, fn;
+        value, first, len, ctxThis;
+    dust.log('Searching for reference [{' + down.join('.') + '}] in template [' + this.getTemplateName() + ']', DEBUG);
     first = down[0];
     len = down.length;
 
@@ -342,14 +302,9 @@
         } else {
           ctx = this.global ? this.global[first] : undefined;
         }
-      } else if (ctx) {
+      } else {
         // if scope is limited by a leading dot, don't search up the tree
-        if(ctx.head) {
-          ctx = ctx.head[first];
-        } else {
-          //context's head is empty, value we are searching for is not defined
-          ctx = undefined;
-        }
+        ctx = ctx.head[first];
       }
 
       while (ctx && i < len) {
@@ -361,15 +316,14 @@
 
     // Return the ctx or a function wrapping the application of the context.
     if (typeof ctx === 'function') {
-      fn = function() {
+      var fn = function() {
         try {
           return ctx.apply(ctxThis, arguments);
         } catch (err) {
-          dust.log(err, ERROR);
-          throw err;
+          return dust.log(err, ERROR);
         }
       };
-      fn.__dustBody = !!ctx.__dustBody;
+      fn.isFunction = true;
       return fn;
     } else {
       if (ctx === undefined) {
@@ -520,6 +474,7 @@
       this.events = {};
     }
     if (!this.events[type]) {
+      dust.log('Event type [' + type + '] does not exist. Using just the specified callback.', WARN);
       if(callback) {
         this.events[type] = callback;
       } else {
@@ -585,12 +540,7 @@
 
     this.next = branch;
     this.flushable = true;
-    try {
-      callback(branch);
-    } catch(e) {
-      dust.log(e, ERROR);
-      branch.setError(e);
-    }
+    callback(branch);
     return cursor;
   };
 
@@ -616,6 +566,7 @@
 
   Chunk.prototype.reference = function(elem, context, auto, filters) {
     if (typeof elem === 'function') {
+      elem.isFunction = true;
       // Changed the function calling to use apply with the current context to make sure
       // that "this" is wat we expect it to be inside the function
       elem = elem.apply(context.current(), [this, context, null, {auto: auto, filters: filters}]);
@@ -632,13 +583,8 @@
 
   Chunk.prototype.section = function(elem, context, bodies, params) {
     // anonymous functions
-    if (typeof elem === 'function' && !elem.__dustBody) {
-      try {
-        elem = elem.apply(context.current(), [this, context, bodies, params]);
-      } catch(e) {
-        dust.log(e, ERROR);
-        return this.setError(e);
-      }
+    if (typeof elem === 'function') {
+      elem = elem.apply(context.current(), [this, context, bodies, params]);
       // functions that return chunks are assumed to have handled the body and/or have modified the chunk
       // use that return value as the current chunk and go to the next method in the chain
       if (elem instanceof Chunk) {
@@ -785,15 +731,15 @@
   Chunk.prototype.helper = function(name, context, bodies, params) {
     var chunk = this;
     // handle invalid helpers, similar to invalid filters
-    if(dust.helpers[name]) {
-      try {
+    try {
+      if(dust.helpers[name]) {
         return dust.helpers[name](chunk, context, bodies, params);
-      } catch(e) {
-        dust.log('Error in ' + name + ' helper: ' + e, ERROR);
-        return chunk.setError(e);
+      } else {
+        dust.log('Invalid helper [' + name + ']', WARN);
+        return chunk;
       }
-    } else {
-      dust.log('Invalid helper [' + name + ']', WARN);
+    } catch (err) {
+      dust.log(err, ERROR);
       return chunk;
     }
   };
@@ -817,13 +763,6 @@
     return this;
   };
 
-  // Chunk aliases
-  for(var f in Chunk.prototype) {
-    if(dust._aliases[f]) {
-      Chunk.prototype[dust._aliases[f]] = Chunk.prototype[f];
-    }
-  }
-
   function Tap(head, tail) {
     this.head = head;
     this.tail = tail;
@@ -843,7 +782,7 @@
     return value;
   };
 
-  var HCHARS = /[&<>"']/,
+  var HCHARS = new RegExp(/[&<>\"\']/),
       AMP    = /&/g,
       LT     = /</g,
       GT     = />/g,
@@ -895,4 +834,5 @@
     root.dust = dust;
   }
 
-})((function(){return this;})());
+})(this);
+
