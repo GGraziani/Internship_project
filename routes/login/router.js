@@ -28,7 +28,6 @@ router.post('/', function(req,res,next){
             if (!user){
                 return res.render('login', { message: info.message })
             }
-
             req.session.userdata = {
                 uid : user.uid,
                 username: user.username,

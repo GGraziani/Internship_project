@@ -79,6 +79,7 @@ input {
 }
 
 #login input[type="submit"] {
+	font-family: 'FontAwesome';
 	background: #e14d4d;
 	border: 1px solid #391515;
 	border-radius: 5px;
