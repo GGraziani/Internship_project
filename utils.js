@@ -153,6 +153,7 @@ module.exports.plotData = function(rows, field, interval) {
             counter2 = 1
         }
     }
+
     return [i_avg, i_sum];
 };
 

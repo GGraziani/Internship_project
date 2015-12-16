@@ -47,6 +47,8 @@ app.use("/logout",routers.logout);
 app.use('/', routers.user);
 app.use('/home', routers.user);
 app.use('/dashboard', routers.user);
+app.use('/getData', routers.getData);
+
 
 // admin routes
 app.use('/admin', routers.admin);

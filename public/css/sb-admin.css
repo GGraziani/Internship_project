@@ -250,9 +250,15 @@ ul.alert-dropdown {
     color: white;
 }
 
-.unactive > .content {
+.inactive > .content {
     max-height: 0;
     overflow: hidden;
+
+}
+.active > .content{
+    height: auto;
+    width: 96%;
+    margin: 0 auto;
 }
 
 .list_indicator{
@@ -260,3 +266,31 @@ ul.alert-dropdown {
     color: white;
 }
 
+.m_logo{
+    width: 225px;
+    display:inline-block;
+    /*padding : 2px 2px;*!/*/
+    padding: 0;
+    margin: auto;
+    /*margin-right:1.3em;*/
+    /*margin-left:2.0em;*/
+}
+.m_logo:hover{
+    background-color: #000 !important;
+}
+
+.m_logo > img{
+    display:block;
+    margin: auto;
+    height: 50px;
+}
+
+.gauge{
+
+    position: relative;
+    width: 360px;
+    height: 380px;
+    box-sizing: border-box;
+    margin:auto;
+    padding-top: 20px;
+}
