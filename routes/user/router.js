@@ -67,7 +67,9 @@ router.get('/dashboard', middleware.authorize,function(req, res, next) {
     utils.request('SELECT ip FROM pdu WHERE uid = ?', [req.session.userdata.uid],
         function(errQ1, rowsQ1, connectionQ1){
 
+            // Free connection back to the pool
             connectionQ1.release();
+
             if(errQ1) {
                 console.error('Error selecting: ' + err.stack);
             } else {
@@ -76,16 +78,17 @@ router.get('/dashboard', middleware.authorize,function(req, res, next) {
                 paramsQ1.push(rowsQ1[0].ip);
                 var ips = "ip = ?";
                 for( var i = 1; i < rowsQ1.length; i++ ){
-                    ips += " or ip = ?";
+                    ips += " OR ip = ?";
                     paramsQ1.push(rowsQ1[i].ip)
                 }
 
                 console.log(ips);
                 console.log(paramsQ1);
 
-                utils.request('SELECT  date, time, out1 FROM rilevazioni WHERE date > ? and (' + ips + ')', paramsQ1,
+                utils.request('SELECT  date, time, out1 FROM rilevazioni WHERE date > ? AND (' + ips + ')', paramsQ1,
                     function(errQ2, rowsQ2, connectionQ2){
 
+                        // Free connection back to the pool
                         connectionQ2.release();
                         console.log("Successful connection.release()");
 
@@ -95,7 +98,7 @@ router.get('/dashboard', middleware.authorize,function(req, res, next) {
                             var data = {
                                 averageMonth : utils.getAverage(rowsQ2, 'out1'),
                                 average24h : utils.getAverage(rowsQ2, 'out1', 24)
-                            }
+                            };
                             res.json(data);
                         }
 

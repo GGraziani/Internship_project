@@ -12,6 +12,10 @@ var pool = mysql.createPool( {
 
 });
 
+pool.on('enqueue', function () {
+    console.log('Waiting for available connection slot');
+});
+
 // connected to DB as user moresi.
 
 
@@ -20,10 +24,6 @@ module.exports.request = function(query, params, callback) {
     pool.getConnection(function (err, connection) {
 
         if (!err) {
-
-            pool.on('enqueue', function () {
-                console.log('Waiting for available connection slot');
-            });
 
             console.log('Connected as id ' + connection.threadId);
 
@@ -41,63 +41,35 @@ module.exports.request = function(query, params, callback) {
 module.exports.getDate = function(){
 
     var current_date = new Date();
-    var current_year = 1900 + current_date.getYear();
-    var current_month = 0 + '' + 9;
+    // taking one less year because of the outdated db
+    var current_year = 1900 + current_date.getYear() - 1;
+    var current_month = '';
+    if (current_date.getMonth() < 9) {
+        current_month = 0 + '' + (current_date.getMonth() + 1);
+    } else {
+        current_month = current_date.getMonth() + 1;
+    }
 
-    return current_year + '' + current_month + '' + 0 + '' + 0;;
+    return current_year + '' + current_month + '' + 0 + '' + 0;
 };
 
-//module.exports.getAverageOut1 = function(rows){
-//
-//    var average = 0;
-//    for(var i = 0; i < rows.length; i++) {
-//        average += rows[i]['out1'];
-//    }
-//    return (average/rows.length).toFixed(2);
-//};
+module.exports.getBillingDate = function() {
+    //var current_date = new Date();
+    //// taking one less year because of the outdated db
+    //var current_year = 1900 + current_date.getYear() - 1;
+    //var current_month = '';
+    //if (current_date.getMonth() == 0) { // January -> bill December
+    //    current_month = 12;
+    //    current_year -= 1;
+    //} else {
+    //    current_month = current_date.getMonth()
+    //}
+    //var startBilling = current_year + '' + current_month + '' + 0 + '' + 0;
+    //var endBilling = current_year + '' + (current_month + 1) + '' + 0 + '' + 0;
+    //return [startBilling, endBilling];
 
-//module.exports.getAverage = function(rows, field, interval) {
-//
-//    var temp = 0;
-//
-//
-//    if(!interval) { // Do month average and return one value.
-//
-//        for( var i = 0; i < rows.length; i++ ) {
-//            temp += rows[i][field];
-//        }
-//        // Return average with 2 sig
-//        return (temp/rows.length).toFixed(2);
-//
-//
-//    } else { // Do average for every 'interval' values, return array.
-//
-//        var average = [];
-//
-//        for( var i = 0 ; i < rows.length; i++ ) {
-//            temp += rows[i][field];
-//            console.log(rows[i]);
-//            if( (i + 1)%interval == 0) {
-//
-//                temp = temp/interval;
-//                average.push( [new Date(getDate(rows[i].date)),temp.toFixed(2)] );
-//
-//            }
-//        }
-//
-//        // If array.length() isn't divisible by interval divide the last member properly.
-//
-//        if( (i + 1)%interval != 0) {
-//
-//            console.log("--" ,rows.length, interval, rows.length % interval);
-//            temp = temp / (rows.length % interval);
-//            average.push( [new Date(getDate(rows[i-1].date)),temp.toFixed(2)] );
-//        }
-//
-//        return average;
-//    }
-//
-//};
+    return ["20150500", "20150600"]
+};
 
 module.exports.getAverage = function(rows, field, interval) {
     var temp = 0;
@@ -134,7 +106,7 @@ module.exports.getAverage = function(rows, field, interval) {
                     ]);
                 }
             } else{
-                startTime.setHours(interval/2)
+                startTime.setHours(interval/2);
                 average.push([
                     startTime.getTime(),
                     temp/counter
@@ -152,11 +124,37 @@ module.exports.getAverage = function(rows, field, interval) {
 
 };
 
+//internal getDate
 function getDate(date,time){
+
     date = date.toString();
-    //console.log("time")
-    //console.log(time)
     time = time.toString();
 
-    return new Date(parseInt(date.substring(0, 4)),parseInt(date.substring(4, 6)),parseInt(date.substring(6, 8)),parseInt(time.substring(0, 2)),parseInt(time.substring(2, 4)));
+    return new Date(parseInt(date.substring(0, 4)), parseInt(date.substring(4, 6)),
+        parseInt(date.substring(6, 8)), parseInt(time.substring(0, 2)), parseInt(time.substring(2, 4)));
 }
+
+
+// functions that given the rilevations passed how much it has consumed over his limit
+module.exports.notPayed = function(rilevations, paid) {
+    var overConsumed = 0;
+    for(var i = 0; i < rilevations.length; i++) {
+        if(rilevations[i].out1 > paid) {
+            overConsumed += (rilevations[i].out1 - paid);
+        }
+    }
+    return overConsumed.toFixed(2);
+};
+
+// gives out the billing
+module.exports.billing = function(rilevations, paid, price) {
+    var bill = 0;
+    var more = 0;
+    for(var i = 0; i < rilevations.length; i++) {
+        if(rilevations[i].out1 > paid) {
+            more += rilevations[i].out1 - paid;
+            bill += (rilevations[i].out1 - paid)*price;
+        }
+    }
+    return [bill.toFixed(2), more.toFixed(2)];
+};

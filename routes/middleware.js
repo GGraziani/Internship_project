@@ -11,7 +11,7 @@ module.exports.supportedMethods = function(commaSeperatedMethods){
 };
 
 module.exports.authorize = function(req, res, next) {
-    console.log("authorize user")
+    console.log("authorize user");
     if (!req.session.passport.user) {
         res.redirect('/login');
     } else {
@@ -20,7 +20,7 @@ module.exports.authorize = function(req, res, next) {
 };
 
 module.exports.authorizeAdmin = function(req, res, next) {
-    console.log("authorize admin")
+    console.log("authorize admin");
     if (!req.session.passport.user) {
         res.redirect('/login');
     } else {

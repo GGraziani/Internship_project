@@ -171,7 +171,7 @@
                     </li>
                     {/eq}
                     {/select}
-                    <li>
+                    <li id="billing">
                         <a href="#"><i class="fa fa-dollar"></i> Billing</a>
                     </li>
                     {/permissions}
@@ -181,6 +181,28 @@
         </nav>
 
         <div id="page-wrapper">
+            {@select key=permissions }
+            {@eq value="B"}
+                <form onsubmit="return bill()">
+                    Company name: <br>
+                    <input type="text" name="company" id="company" value="Beitsa">
+                    </br>
+                    Starting billing date (format yyyymmdd): <br>
+                    <input type="text" name="dateStart" id="dateStart" value="20150500">
+                    </br> Ending billing date (format yyyymmdd): <br>
+                    <input type="text" name="dateEnd" id="dateEnd" value="20150600"
+                    </br>
+                    <input type="submit" value="Submit">
+                </form>
+                <form onsubmit="return xmlbill()">
+                    XML BILL <br>
+                    <input type="submit" value="Submit">
+                </form>
+
+
+            {/eq}
+            {/select}
+
 
 
         </div>
